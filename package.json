@@ -1,0 +1,17 @@
+{
+    "name": "gitbook-plugin-copy-pdf",
+    "version": "0.0.1",
+    "description": "Copy all pdf files to corresponding directory in '_book'",
+    "engines": {
+        "gitbook": ">1.x.x"
+    },
+    "gitbook": {
+        "properties": {
+            "myConfigKey": {
+                "type": "string",
+                "default": "it's the default value",
+                "description": "It defines my awesome config!"
+            }
+        }
+    }
+}
