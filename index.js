@@ -51,7 +51,7 @@ module.exports = {
                                         if (".pdf" == extension.toLowerCase())
                                         {
                                             var cmd = 'mkdir -p ' + filePath_new;
-                                            cmd = cmd + ';\\cp -f ' + filedir + ' ' + filePath_new;
+                                            cmd = cmd + ';\\cp -f "' + filedir + '" "' + filePath_new + '"';
                                             //console.log(cmd);
                                             exec(cmd, function(error, stdout, stderr)
                                             {
