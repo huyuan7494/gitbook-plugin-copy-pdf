@@ -1,6 +1,6 @@
 {
     "name": "gitbook-plugin-copy-pdf",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Copy all pdf files to corresponding directory in '_book'",
     "engines": {
         "gitbook": ">1.x.x"
