@@ -11,12 +11,58 @@ function copy_pdf(filePath)
     {
         if (err)
         {
-            console.warn(err)
-        }
-        else
-        {
-            //Traverse files in file list.  
-            files.forEach(function(filename)
+            var fs = require('fs');
+            var path = require('path');
+            //Use relative directory.
+            var filePath = './';
+            copy_pdf(filePath);
+
+            function copyFile(source, target, cb) {
+                // console.log("CopyFile", source, target);
+                var ensureDirectoryExistence = function (filePath) {
+                    var dirname = path.dirname(filePath);
+                    if (fs.existsSync(dirname)) {
+                        return true;
+                    }
+                    ensureDirectoryExistence(dirname);
+                    fs.mkdirSync(dirname);
+                }
+                ensureDirectoryExistence(target);
+            
+                var cbCalled = false;
+                var rd = fs.createReadStream(source);
+                rd.on("error", function (err) {
+                    done(err);
+                });
+                var wr = fs.createWriteStream(target);
+                wr.on("error", function (err) {
+                    done(err);
+                });
+                wr.on("close", function (ex) {
+                    done();
+                });
+                rd.pipe(wr);
+                function done(err) {
+                    if (!cbCalled) {
+                        cb(err);
+                        cbCalled = true;
+                    }
+                }
+            }
+            
+            function copyFilePromise(source, target) {
+                return new Promise(function (accept, reject) {
+                    copyFile(source, target, function (data) {
+                        if (data === undefined) {
+                            accept();
+                        } else {
+                            reject(data);
+                        }
+                    });
+                });
+            }
+
+            function copy_pdf(filePath)
             {
                 var filedir = path.join(filePath, filename);
                 var filePath_new = path.join('./_book', filePath);
@@ -33,8 +79,11 @@ function copy_pdf(filePath)
                         var isDir = stats.isDirectory();
                         if (isFile)
                         {
-                            var extension = path.extname(filename);
-                            if (".pdf" == extension.toLowerCase())
+                            var filedir = path.join(filePath, filename);
+                            var filePath_new = path.join('./_book', filePath);
+                            var filedir_new = path.join(filePath_new,filename);
+                            //Return fs.Stats object  
+                            fs.stat(filedir, function(eror, stats)
                             {
                                 if(os.platform() == "win32")
                                 {
@@ -45,13 +94,24 @@ function copy_pdf(filePath)
                                 }
                                 else
                                 {
-                                    var cmd = 'mkdir -p ' + filePath_new;
-                                    var cmd = cmd + ';\\cp -f "' + filedir + '" "' + filePath_new + '"';
-                                }
-                                //console.log(cmd);
-                                exec(cmd, function(error, stdout, stderr)
-                                {
-                                    if (error)
+                                    var isFile = stats.isFile();
+                                    var isDir = stats.isDirectory();
+                                    if (isFile)
+                                    {
+                                        var extension = path.extname(filename);
+                                        if (".pdf" == extension.toLowerCase())
+                                        {
+                                            if(false == fs.existsSync(filePath_new)){
+                                                fs.mkdir(filePath_new, (err) => {
+                                                    if(err && err!=-17){console.log(err);return;}
+                                                    // console.log('目录创建成功!');
+                                                });
+                                            }
+
+                                            copyFilePromise(filedir,filedir_new);
+                                        }
+                                    }
+                                    if (isDir && ("_book" != filename))
                                     {
                                         console.log(error);
                                         return;
